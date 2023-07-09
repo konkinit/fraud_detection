@@ -1,2 +1,10 @@
-# fraud_detection
-The project consists of implementing an auto-encoder-based fraud detector
+# Fraud Detection
+
+The project consists of implementing an autoencoder-based fraud detector
+
+
+## To-Do
+
+- 
+
+## References & Citations
