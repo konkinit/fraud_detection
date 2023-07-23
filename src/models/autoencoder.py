@@ -1,6 +1,7 @@
 import os
 import sys
 from torch import nn, Tensor
+from typing import Any
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
@@ -41,7 +42,18 @@ class FraudAutoEncoder(nn.Module):
             nn.ReLU()
         )
 
-    def forward(self, input_features: Tensor):
+    def forward(
+            self,
+            input_features: Tensor
+    ) -> Any:
+        """Forward pass
+
+        Args:
+            input_features (Tensor): input tensor
+
+        Returns:
+            Any: model output
+        """
         _encoded = self.encoder(input_features)
         _decoded = self.decoder(_encoded)
         return _decoded

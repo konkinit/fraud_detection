@@ -1,8 +1,16 @@
+import os
+import sys
 from numpy import array, ndarray
 from torch import Tensor, float32, from_numpy
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from typing import List, Tuple
+
+
+if os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
+from src.utils import ml_partitions_indices
+
 
 dataloader_kwargs = {
     "batch_size": 16,
@@ -40,9 +48,12 @@ class DataLoaders:
         if type(raw_dataset) == ndarray:
             raw_dataset = from_numpy(raw_dataset)
         raw_dataset = raw_dataset.to(float32)
-        self.train_dataset = CustomersDataset(raw_dataset)
-        self.validation_dataset = CustomersDataset(raw_dataset)
-        self.test_dataset = CustomersDataset(raw_dataset)
+        idx_arrays = ml_partitions_indices(
+            raw_dataset.shape[0], split_fractions
+        )
+        self.train_dataset = CustomersDataset(raw_dataset[idx_arrays[0]])
+        self.validation_dataset = CustomersDataset(raw_dataset[idx_arrays[1]])
+        self.test_dataset = CustomersDataset(raw_dataset[idx_arrays[2]])
 
     def get_dataloaders(self) -> Tuple[DataLoader]:
         """Get train, validation and test Pytorch dataloaders

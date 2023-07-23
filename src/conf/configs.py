@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class LAYERS_DIMS:
     ENCODER_HIDDEN_DIM: int = 32
-    ENCODER_OUTPUT_DIM: int = 32
+    ENCODER_OUTPUT_DIM: int = 8
     DECODER_HIDDEN_DIM: int = 32
 
 
