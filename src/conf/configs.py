@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 @dataclass
 class LAYERS_DIMS:
-    ENCODER_HIDDEN_DIM: int = 32
-    ENCODER_OUTPUT_DIM: int = 8
-    DECODER_HIDDEN_DIM: int = 32
+    INPUT_DIM: int
+    HIDDEN_DIM: int
+    CODE_DIM: int
 
 
 @dataclass
 class MODEL_FEATURES:
-    LEARNING_RATE: float = 1e-3
-    N_EPOCHS: int = 100
+    LEARNING_RATE: float
+    N_EPOCHS: int

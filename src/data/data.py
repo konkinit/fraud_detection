@@ -45,7 +45,7 @@ class DataLoaders:
             split_fractions: List[float]
     ) -> None:
         assert array(split_fractions).sum().round(1) == 1.0
-        if type(raw_dataset) == ndarray:
+        if raw_dataset is ndarray:
             raw_dataset = from_numpy(raw_dataset)
         raw_dataset = raw_dataset.to(float32)
         idx_arrays = ml_partitions_indices(

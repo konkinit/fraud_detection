@@ -13,31 +13,30 @@ from src.conf import (
 class FraudAutoEncoder(nn.Module):
     def __init__(
             self,
-            input_dim: int,
-            layer_features: LAYERS_DIMS
+            layer_dimensions: LAYERS_DIMS
     ) -> None:
         super().__init__()
         self.encoder = nn.Sequential(
             nn.Linear(
-                in_features=input_dim,
-                out_features=layer_features.ENCODER_HIDDEN_DIM
+                in_features=layer_dimensions.INPUT_DIM,
+                out_features=layer_dimensions.HIDDEN_DIM
             ),
             nn.ReLU(),
             nn.Linear(
-                in_features=layer_features.ENCODER_HIDDEN_DIM,
-                out_features=layer_features.ENCODER_OUTPUT_DIM,
+                in_features=layer_dimensions.HIDDEN_DIM,
+                out_features=layer_dimensions.CODE_DIM,
             ),
             nn.ReLU()
         )
         self.decoder = nn.Sequential(
             nn.Linear(
-                in_features=layer_features.ENCODER_OUTPUT_DIM,
-                out_features=layer_features.DECODER_HIDDEN_DIM,
+                in_features=layer_dimensions.CODE_DIM,
+                out_features=layer_dimensions.HIDDEN_DIM,
             ),
             nn.ReLU(),
             nn.Linear(
-                in_features=layer_features.DECODER_HIDDEN_DIM,
-                out_features=input_dim,
+                in_features=layer_dimensions.HIDDEN_DIM,
+                out_features=layer_dimensions.INPUT_DIM,
             ),
             nn.ReLU()
         )

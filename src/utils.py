@@ -19,6 +19,8 @@ def get_device(device_id: int = 0) -> device:
         device: pytoorch device
     """
     if cuda.is_available():
+        if cuda.device_count() == 1:
+            return device("cuda")
         return device(f"cuda:{device_id}")
     return device("cpu")
 

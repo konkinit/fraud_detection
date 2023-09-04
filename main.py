@@ -1,98 +1,58 @@
 import os
 import sys
-import torch
+from argparse import ArgumentParser
 import numpy as np
 import plotly.express as px
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.conf import LAYERS_DIMS, MODEL_FEATURES
-from src.models import FraudAutoEncoder
-from src.data import DataLoaders
-from src.utils import get_device, losses_dataframe
+from src.models import Model_Trainer
 
 
-DEVICE = get_device(1)
+_arg_parser = ArgumentParser()
+_arg_parser.add_argument(
+    '-f', '--splitfrac', nargs=3, type=float,
+    help="""
+    Split fractions provided in the order train,
+    validation and test proportions
+    """, required=True
+)
+_arg_parser.add_argument(
+    "--hiddendim", type=int,
+    help="Encoder hidden layer dimension", required=True
+)
+_arg_parser.add_argument(
+    "--codedim", type=int,
+    help="Auto-encoder code layer dimension", required=True
+)
+_arg_parser.add_argument(
+    "--lr", type=float,
+    help="Learning rate", required=True
+)
+_arg_parser.add_argument(
+    "--nepochs", type=int,
+    help="Number of epochs", required=True
+)
+args = _arg_parser.parse_args()
 
 
 if __name__ == "__main__":
-    # Data prep
-    SAMPLING_PARAMS = {"low": -1, "high": 1, "size": [5_000, 300]}
-    DATA_SPLIT_FRACS = [0.7, 0.2, 0.1]
-    simul_data = np.random.uniform(**SAMPLING_PARAMS)
-    _simul_data = torch.from_numpy(simul_data).to(DEVICE)
+    sampling_params = {"low": -1, "high": 1, "size": [5_000, 300]}
+    simul_data = np.random.uniform(**sampling_params)
 
-    # Model configuration
-    INPUT_DIM = _simul_data.shape[1]
-    _LAYERS_DIMS = LAYERS_DIMS(
-        ENCODER_HIDDEN_DIM=150, ENCODER_OUTPUT_DIM=16, DECODER_HIDDEN_DIM=150
+    _model_trainer = Model_Trainer(
+        raw_data=simul_data,
+        data_split_fractions=args.splitfrac,
+        hidden_dim=args.hiddendim,
+        code_dim=args.codedim,
+        learning_rate=args.lr,
+        n_epochs=args.nepochs
     )
-    model = FraudAutoEncoder(INPUT_DIM, LAYERS_DIMS).to(DEVICE)
-    optimizer = torch.optim.Adam(
-        model.parameters(),
-        lr=MODEL_FEATURES.LEARNING_RATE
-    )
-    loss_criterion = torch.nn.MSELoss()
 
-    # Get Pytorch Dataloaders
-    (train_dataloader, validation_dataloader, test_dataloader) = DataLoaders(
-        _simul_data, DATA_SPLIT_FRACS
-    ).get_dataloaders()
-
-    # Model Training
-    training_losses, validation_losses = [], []
-
-    for epoch in range(MODEL_FEATURES.N_EPOCHS):
-        # Weights update for each epoch
-        epoch_train_loss = 0.0
-        for _, inputs in enumerate(train_dataloader):
-            # Zero gradients for every batch!
-            optimizer.zero_grad()
-
-            # Make encoding and decoding
-            reconstitued_inputs = model(inputs)
-
-            # Compute loss and its gradients on trining datasets
-            training_loss = loss_criterion(inputs, reconstitued_inputs)
-            training_loss.backward()
-
-            # Adjust learning weights
-            optimizer.step()
-
-            # Evaluate epoch loss
-            epoch_train_loss += float(
-                training_loss.data) / len(train_dataloader)
-
-        training_losses.append(epoch_train_loss)
-
-        # Inference after each epoch on validation data
-        epoch_validation_loss = 0.0
-        for _, validation_inputs in enumerate(validation_dataloader):
-            reconstitued_validation_inputs = model(validation_inputs)
-            with torch.no_grad():
-                validation_loss = loss_criterion(
-                    validation_inputs, reconstitued_validation_inputs
-                )
-                epoch_validation_loss += float(validation_loss.data) / len(
-                    validation_dataloader
-                )
-
-        validation_losses.append(epoch_validation_loss)
-
-        print(
-            """
-            Epoch {:} : Training loss = {:.6f} | Validation loss = {:.6f}
-            """.format(
-                epoch, training_loss, validation_loss
-            )
-        )
-
-    # Inference
-    df_losses = losses_dataframe(
-        MODEL_FEATURES.N_EPOCHS, training_losses, validation_losses
-    )
+    _model_trainer.train()
 
     fig = px.line(
-        df_losses, x="epoch", y="loss", color="split", height=500, width=800
+        _model_trainer.losses_dataframe, x="epoch", y="loss",
+        color="split", height=500, width=800
     )
     fig.show()
