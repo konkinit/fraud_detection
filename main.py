@@ -1,7 +1,6 @@
 import os
 import sys
 from argparse import ArgumentParser
-import numpy as np
 import plotly.express as px
 
 if os.getcwd() not in sys.path:
@@ -13,11 +12,20 @@ parser = ArgumentParser(
     description="Model training args parser"
 )
 parser.add_argument(
+    '--idmodel', type=str,
+    help="""
+    Model unique identifier""", required=True
+)
+parser.add_argument(
+    '--rawdatapath', type=str,
+    help="""
+    Raw data storage path""", required=True
+)
+parser.add_argument(
     '--splitfrac', nargs=3, type=float,
     help="""
     Split fractions provided in the order train,
-    validation and test proportions
-    """, required=True
+    validation and test proportions""", required=True
 )
 parser.add_argument(
     "--hiddendim", type=int,
@@ -39,12 +47,10 @@ args = parser.parse_args()
 
 
 if __name__ == "__main__":
-    sampling_params = {"low": -1, "high": 1, "size": [5_000, 300]}
-    simul_data = np.random.uniform(**sampling_params)
 
     _model_trainer = Model_Trainer(
-        model_id="sampled_data",
-        raw_data=simul_data,
+        model_id=args.idmodel,
+        raw_data_path=args.rawdatapath,
         data_split_fractions=args.splitfrac,
         hidden_dim=args.hiddendim,
         code_dim=args.codedim,
@@ -52,7 +58,7 @@ if __name__ == "__main__":
         n_epochs=args.nepochs
     )
 
-    _model_trainer.train()
+    _model_trainer.update_weights(mode="train")
 
     fig = px.line(
         _model_trainer.losses_dataframe, x="epoch", y="loss",
