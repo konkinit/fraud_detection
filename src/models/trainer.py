@@ -21,6 +21,7 @@ DEVICE = get_device(1)
 class Model_Trainer:
     def __init__(
             self,
+            model_id: str,
             raw_data: Union[ndarray],
             data_split_fractions: List[float],
             hidden_dim: int,
@@ -28,6 +29,7 @@ class Model_Trainer:
             learning_rate: float,
             n_epochs: int
     ) -> None:
+        self.model_id = model_id
         # Data setting
         self.raw_data = torch.from_numpy(raw_data).to(DEVICE)
         (
@@ -55,10 +57,14 @@ class Model_Trainer:
         )
         self.loss_criterion = torch.nn.MSELoss()
 
-    def train(self) -> None:
+    def train(self, **kwargs) -> None:
         """Train the model on training data and make inference
         """
         training_losses, validation_losses = [], []
+        minimum_validation_loss = float("inf")
+        best_epoch = None
+        best_model_state_dict = None
+        best_optimizer_state_dict = None
         for epoch in range(self.model_hyperparams.N_EPOCHS):
             # Weights update for each epoch
             epoch_train_loss = 0.0
@@ -96,7 +102,19 @@ class Model_Trainer:
                         self.validation_dataloader
                     )
 
+            if epoch_validation_loss < minimum_validation_loss:
+                minimum_validation_loss = epoch_validation_loss
+                best_epoch = epoch
+                best_model_state_dict = self.model.state_dict()
+                best_optimizer_state_dict = self.optimizer.state_dict()
+
             validation_losses.append(epoch_validation_loss)
+
+        torch.save({
+            'epoch': best_epoch,
+            'model_state_dict': best_model_state_dict,
+            'optimizer_state_dict': best_optimizer_state_dict
+        }, f"./models/best_model_{self.model_id}.ckpt")
 
         self.losses_dataframe = losses_dataframe(
             self.model_hyperparams.N_EPOCHS, training_losses, validation_losses

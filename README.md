@@ -6,7 +6,7 @@
 
 The project consists of implementing an autoencoder-based fraud detector
 
-<p>
+<p align="center">
     <img alt="GitHub" src="https://img.shields.io/github/license/konkinit/fraud_detection?style=for-the-badge">
     <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/konkinit/fraud_detection?style=for-the-badge">
     <a href="https://www.python.org/downloads/release/python-3100/" target="_blank">
@@ -17,7 +17,6 @@ The project consists of implementing an autoencoder-based fraud detector
 
 ## To-Do
 
-- Implement Early stopping with PyTorch
 - Write Unit Tests
 - Search real data for implementation
 
@@ -33,7 +32,7 @@ python main.py --help
 ```
 
 ```bash
-python main.py --lr 1e-3 --nepochs 100 --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150
+python main.py --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 100
 ```
 
 ## References & Citations
