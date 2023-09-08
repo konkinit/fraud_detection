@@ -6,6 +6,7 @@
 The project consists of implementing an autoencoder-based fraud detector
 
 <p align="center">
+    <img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/kidrissa/fraud_detection/test_lint.yaml?style=for-the-badge&label=lint%20%26%20test">
     <br/>
     <img alt="GitHub" src="https://img.shields.io/github/license/konkinit/fraud_detection?style=for-the-badge">
     <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/konkinit/fraud_detection?style=for-the-badge">
