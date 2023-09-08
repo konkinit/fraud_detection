@@ -63,6 +63,7 @@ class Model_Trainer:
     def retrain_config(self, **kwargs) -> None:
         """Model configuration for retraining
         """
+        assert "./data/simulated_raw_data.gzip"
         checkpoint = torch.load(
             "./models/best_model_simulated_data.ckpt", map_location="cuda:0"
         )

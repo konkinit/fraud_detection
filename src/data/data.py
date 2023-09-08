@@ -44,8 +44,11 @@ class DataLoaders:
             raw_dataset: ndarray | Tensor,
             split_fractions: List[float]
     ) -> None:
-        assert array(split_fractions).sum().round(1) == 1.0
-        if raw_dataset is ndarray:
+        assert array(
+            split_fractions
+        ).sum().round(1) == 1.0, "Sum of fractions diffrent of 1.0"
+
+        if isinstance(raw_dataset, ndarray):
             raw_dataset = from_numpy(raw_dataset)
         raw_dataset = raw_dataset.to(float32)
         idx_arrays = ml_partitions_indices(

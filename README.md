@@ -3,10 +3,10 @@
     <br/>
 </h1>
 
-
 The project consists of implementing an autoencoder-based fraud detector
 
 <p align="center">
+    <br/>
     <img alt="GitHub" src="https://img.shields.io/github/license/konkinit/fraud_detection?style=for-the-badge">
     <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/konkinit/fraud_detection?style=for-the-badge">
     <a href="https://www.python.org/downloads/release/python-3100/" target="_blank">
@@ -17,20 +17,20 @@ The project consists of implementing an autoencoder-based fraud detector
 
 ## To-Do
 
-- Implement model retraining
+- Design an online learning framework | Implement model retraining
 - Write Unit Tests
 - Search real data for implementation
 
 
 ## Quick Start
 
-Clone the repo, get in the directory `fraud_detection/` and run the `main.py` program with the tuned args
+Clone the repo, get in the directory `fraud_detection/` and run the `main.py` program with the args tuned
 ```bash
 git clone https://github.com/konkinit/fraud_detection.git
 ```
 
 ```bash
-python /fraud_detection/main.py --idmodel 'simulated_data' --rawdatapath './data/simulated_raw_data.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
+python main.py --idmodel 'simulated_data' --rawdatapath './data/simulated_raw_data.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
 ```
 
 ## References & Citations
