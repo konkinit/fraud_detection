@@ -12,3 +12,12 @@ class LAYERS_DIMS:
 class MODEL_FEATURES:
     LEARNING_RATE: float
     N_EPOCHS: int
+
+
+@dataclass
+class PLOTTING_FEATURES:
+    X: str = 'epoch'
+    Y: str = 'loss'
+    COLOR: str = "split"
+    HEIGHT: int = 500
+    WIDTH: int = 800

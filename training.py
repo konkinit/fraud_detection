@@ -6,6 +6,7 @@ import plotly.express as px
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.models import Model_Trainer
+from src.conf import PLOTTING_FEATURES
 
 
 parser = ArgumentParser(
@@ -43,6 +44,11 @@ parser.add_argument(
     "--nepochs", type=int,
     help="Number of epochs", required=True
 )
+parser.add_argument(
+    "--mode", type=str,
+    help="Mode of training either train a new model or update \
+    an existing model weigths", required=True
+)
 args = parser.parse_args()
 
 
@@ -58,10 +64,14 @@ if __name__ == "__main__":
         n_epochs=args.nepochs
     )
 
-    _model_trainer.update_weights(mode="train")
+    _model_trainer.update_weights(mode=args.mode)
 
     fig = px.line(
-        _model_trainer.losses_dataframe, x="epoch", y="loss",
-        color="split", height=500, width=800
+        _model_trainer.losses_dataframe,
+        x=PLOTTING_FEATURES.X,
+        y=PLOTTING_FEATURES.Y,
+        color=PLOTTING_FEATURES.COLOR,
+        height=PLOTTING_FEATURES.HEIGHT,
+        width=PLOTTING_FEATURES.WIDTH
     )
     fig.show()

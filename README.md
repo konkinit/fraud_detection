@@ -3,10 +3,12 @@
     <br/>
 </h1>
 
-The project consists of implementing an autoencoder-based fraud detector
+<p align="center">
+    The project consists of implementing an autoencoder-based fraud detector
+</p>
 
 <p align="center">
-    <img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/kidrissa/fraud_detection/test_lint.yaml?style=for-the-badge&label=lint%20%26%20test">
+    <img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/konkinit/fraud_detection/lint_test.yaml?style=for-the-badge&label=Lint%20%26%20Test%20">
     <br/>
     <img alt="GitHub" src="https://img.shields.io/github/license/konkinit/fraud_detection?style=for-the-badge">
     <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/konkinit/fraud_detection?style=for-the-badge">
@@ -20,7 +22,7 @@ The project consists of implementing an autoencoder-based fraud detector
 
 - Design an online learning framework | Implement model retraining
 - Write Unit Tests
-- Search real data for implementation
+- Search for real data for implementation
 
 
 ## Quick Start
@@ -29,9 +31,15 @@ Clone the repo, get in the directory `fraud_detection/` and run the `main.py` pr
 ```bash
 git clone https://github.com/konkinit/fraud_detection.git
 ```
-
+- For training a new model
 ```bash
-python main.py --idmodel 'simulated_data' --rawdatapath './data/simulated_raw_data.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
+python training.py --idmodel 'simulated_data' --rawdatapath './data/simulated_raw_data.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50 --mode 'train'
 ```
+
+- For updating weigths of an existing model
+```bash
+python training.py --idmodel 'simulated_data' --rawdatapath './data/simulated_raw_data_new_arrival.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50 --mode 'retrain'
+```
+
 
 ## References & Citations

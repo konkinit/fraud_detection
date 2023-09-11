@@ -63,16 +63,20 @@ class Model_Trainer:
     def retrain_config(self, **kwargs) -> None:
         """Model configuration for retraining
         """
-        assert "./data/simulated_raw_data.gzip"
-        checkpoint = torch.load(
-            "./models/best_model_simulated_data.ckpt", map_location="cuda:0"
-        )
-        self.train_config()
-        self.model.load_state_dict(checkpoint['model_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        self.epoch = checkpoint['epoch']
+        model_path = f"./models/best_model_{self.model_id}.ckpt"
+        if os.path.isfile(os.path.join(model_path)):
+            checkpoint = torch.load(
+                "./models/best_model_simulated_data.ckpt",
+                map_location="cuda:0"
+            )
+            self.train_config()
+            self.model.load_state_dict(checkpoint['model_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.epoch = checkpoint['epoch']
 
-        self.model.eval()
+            self.model.eval()
+        else:
+            pass
 
     def update_weights(self, mode: str, **kwargs) -> None:
         """Train the model on training data and make inference
