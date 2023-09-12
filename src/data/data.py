@@ -1,7 +1,8 @@
 import os
 import sys
-from numpy import array, ndarray
-from torch import Tensor, float32, from_numpy
+from numpy import array
+from pandas import DataFrame
+from torch import float32, from_numpy
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from typing import List, Tuple
@@ -9,7 +10,10 @@ from typing import List, Tuple
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.utils import ml_partitions_indices
+from src.utils import ml_partitions_indices, get_device
+
+
+DEVICE = get_device(1)
 
 
 dataloader_kwargs = {
@@ -21,42 +25,54 @@ dataloader_kwargs = {
 class CustomersDataset(Dataset):
     def __init__(
             self,
-            dataset,
+            data,
+            ids,
             transform=None
     ) -> None:
         super().__init__()
-        self.dataset = dataset
+        self.dataset = data
+        self.ids = ids
         self.transform = transform
 
     def __len__(self) -> int:
         return self.dataset.shape[0]
 
     def __getitem__(self, index):
-        _data = self.dataset[index]
+        sample = self.dataset[index]
+        sample_id = self.ids[index]
         if self.transform:
-            _data = self.transform(_data)
-        return _data
+            sample = self.transform(sample)
+        return sample_id, sample
 
 
 class DataLoaders:
     def __init__(
             self,
-            raw_dataset: ndarray | Tensor,
+            raw_dataset: DataFrame,
             split_fractions: List[float]
     ) -> None:
         assert array(
             split_fractions
         ).sum().round(1) == 1.0, "Sum of fractions diffrent of 1.0"
+        data = raw_dataset.values
+        ids = raw_dataset.index.values
 
-        if isinstance(raw_dataset, ndarray):
-            raw_dataset = from_numpy(raw_dataset)
-        raw_dataset = raw_dataset.to(float32)
+        data = from_numpy(data).to(DEVICE).to(float32)
         idx_arrays = ml_partitions_indices(
             raw_dataset.shape[0], split_fractions
         )
-        self.train_dataset = CustomersDataset(raw_dataset[idx_arrays[0]])
-        self.validation_dataset = CustomersDataset(raw_dataset[idx_arrays[1]])
-        self.test_dataset = CustomersDataset(raw_dataset[idx_arrays[2]])
+        self.train_dataset = CustomersDataset(
+            data[idx_arrays[0]],
+            ids[idx_arrays[0]]
+        )
+        self.validation_dataset = CustomersDataset(
+            data[idx_arrays[1]],
+            ids[idx_arrays[1]]
+        )
+        self.test_dataset = CustomersDataset(
+            data[idx_arrays[2]],
+            ids[idx_arrays[2]]
+        )
 
     def get_dataloaders(self) -> Tuple[DataLoader]:
         """Get train, validation and test Pytorch dataloaders

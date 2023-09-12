@@ -89,3 +89,7 @@ def losses_dataframe(
             )
         ]
     )
+
+
+def encode_decode_error_dataframe():
+    pass
