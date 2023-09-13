@@ -41,5 +41,9 @@ python training.py --idmodel 'simulated_data' --rawdatapath './data/simulated_ra
 python training.py --idmodel 'simulated_data' --rawdatapath './data/simulated_raw_data_new_arrival.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50 --mode 'retrain'
 ```
 
+- After training or retraining a model, inference on instances is done by running: 
+```bash
+uvicorn production:app --reload
+```
 
 ## References & Citations

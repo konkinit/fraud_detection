@@ -16,8 +16,8 @@ def read_root():
 
 
 @app.get("/customer/{customer_id}")
-def fraud_score(
+def fraud_scorer(
         customer_id: int,
-        q: Union[str, None] = None
+        score: Union[str, None] = None
 ) -> dict:
-    return {"customer_id": customer_id, "q": q}
+    return {"customer_id": customer_id, "score": score}
