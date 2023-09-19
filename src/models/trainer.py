@@ -1,6 +1,7 @@
 import os
 import sys
 import torch
+from datetime import datetime
 from pandas import read_parquet, DataFrame, concat
 from typing import List
 
@@ -71,6 +72,7 @@ class Model_Trainer:
     def update_weights(self, mode: str, **kwargs) -> None:
         """Train the model on training data and make inference"""
         assert mode in ("train", "retrain")
+        self.mode = mode
         self.train_config() if mode == "train" else self.retrain_config()
         training_losses, validation_losses = [], []
         minimum_validation_loss = float("inf")
@@ -140,41 +142,49 @@ class Model_Trainer:
             self.model_hyperparams.N_EPOCHS, training_losses, validation_losses
         )
 
-        def encode_decode_error(self):
-            self.retrain_config()
-            error_func = torch.nn.MSELoss()
-            self.encode_decode_errors = DataFrame(
-                columns=["id", "encode_decode_error", "split"]
-            )
-            dataloader_split_dict = {
-                "train": self.train_dataloader,
-                "validation": self.validation_dataloader,
-                "test": self.test_dataloader
-            }
-            for split in list(dataloader_split_dict.keys()):
-                for _, (batch_ids, batch_samples) in enumerate(
-                        dataloader_split_dict[split]
-                ):
-                    assert batch_ids.shape[0] == batch_samples.shape[0]
-                    for i in range(batch_ids.shape[0]):
-                        with torch.no_grad():
-                            _x = (
-                                torch.from_numpy(batch_samples[i])
-                                .to(DEVICE)
-                                .to(torch.float32)
-                            )
-                            _error = error_func(_x, self.model(_x))
-                            self.encode_decode_errors = concat(
-                                [
-                                    self.encode_decode_errors,
-                                    DataFrame(
-                                        data=[
-                                            {
-                                                "id": batch_ids[i],
-                                                "encode_decode_error": _error,
-                                                "split": split,
-                                            }
-                                        ]
-                                    ),
-                                ]
-                            )
+    def encode_decode_error(self):
+        self.retrain_config()
+        error_func = torch.nn.MSELoss()
+        self.encode_decode_errors_dataframe: DataFrame = DataFrame(
+            columns=["id", "encode_decode_error", "split"]
+        )
+        dataloader_split_dict = {
+            "train": self.train_dataloader,
+            "validation": self.validation_dataloader,
+            "test": self.test_dataloader
+        }
+        for split in list(dataloader_split_dict.keys()):
+            for _, (batch_ids, batch_samples) in enumerate(
+                    dataloader_split_dict[split]
+            ):
+                assert batch_ids.shape[0] == batch_samples.shape[0]
+                for i in range(batch_ids.shape[0]):
+                    with torch.no_grad():
+                        _x = batch_samples[i]
+                        _error = error_func(_x, self.model(_x))
+                        self.encode_decode_errors_dataframe = concat(
+                            [
+                                self.encode_decode_errors_dataframe,
+                                DataFrame(
+                                    data=[
+                                        {
+                                            "id": batch_ids[i].data,
+                                            "reconstruction_error": float(
+                                                _error.data),
+                                            "split": split,
+                                        }
+                                    ]
+                                ),
+                            ]
+                        )
+
+        self.fraud_cutoff = self.encode_decode_errors_dataframe[
+            "encode_decode_error"].max()
+
+    def save_metadata(self) -> dict:
+        return {
+            "model_id": self.model_id,
+            "updating_date": datetime.today(),
+            "action": self.mode,
+            "fraud_cutoff": self.fraud_cutoff
+        }

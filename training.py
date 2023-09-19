@@ -66,12 +66,23 @@ if __name__ == "__main__":
 
     _model_trainer.update_weights(mode=args.mode)
 
+    _model_trainer.encode_decode_error()
+
+    # _model_trainer.save_metadata()
+
+    _fig = px.histogram(
+        _model_trainer.encode_decode_errors_dataframe,
+        x="reconstruction_error",
+        color=PLOTTING_FEATURES.COLOR
+    )
+    _fig.show()
+
     fig = px.line(
         _model_trainer.losses_dataframe,
         x=PLOTTING_FEATURES.X,
         y=PLOTTING_FEATURES.Y,
         color=PLOTTING_FEATURES.COLOR,
-        height=PLOTTING_FEATURES.HEIGHT,
-        width=PLOTTING_FEATURES.WIDTH
     )
-    fig.show()
+    fig.write_image(
+        "./data/figs/losses_epoch.png", engine="kaleido",
+    )
