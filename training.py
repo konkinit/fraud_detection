@@ -68,21 +68,23 @@ if __name__ == "__main__":
 
     _model_trainer.encode_decode_error()
 
-    # _model_trainer.save_metadata()
+    _model_trainer.save_metadata()
 
     _fig = px.histogram(
         _model_trainer.encode_decode_errors_dataframe,
-        x="reconstruction_error",
+        x=PLOTTING_FEATURES.RECONSTRUCTION_ERROR,
         color=PLOTTING_FEATURES.COLOR
     )
-    _fig.show()
-
     fig = px.line(
         _model_trainer.losses_dataframe,
         x=PLOTTING_FEATURES.X,
         y=PLOTTING_FEATURES.Y,
         color=PLOTTING_FEATURES.COLOR,
     )
+
+    _fig.write_image(
+        "./data/figs/reconstruction_error_X_split.png", engine="kaleido",
+    )
     fig.write_image(
-        "./data/figs/losses_epoch.png", engine="kaleido",
+        "./data/figs/losses_X_epoch.png", engine="kaleido",
     )

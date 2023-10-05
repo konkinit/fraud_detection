@@ -1,8 +1,9 @@
 import os
 import sys
 import torch
-from datetime import datetime
+from datetime import date
 from pandas import read_parquet, DataFrame, concat
+from tinydb import TinyDB
 from typing import List
 
 if os.getcwd() not in sys.path:
@@ -43,6 +44,11 @@ class Model_Trainer:
         self.model_hyperparams = MODEL_FEATURES(
             LEARNING_RATE=learning_rate, N_EPOCHS=n_epochs
         )
+        self.model_params = {
+            "input_dim": raw_data.shape[1],
+            "hidden_dim": hidden_dim,
+            "code_dim": code_dim
+        }
 
     def train_config(self, **kwargs) -> None:
         """Model config for first of all training"""
@@ -61,6 +67,7 @@ class Model_Trainer:
                 map_location="cuda:0"
             )
             self.train_config()
+            # assert indifference on params
             self.model.load_state_dict(checkpoint["model_state_dict"])
             self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
             self.epoch = checkpoint["epoch"]
@@ -142,7 +149,9 @@ class Model_Trainer:
             self.model_hyperparams.N_EPOCHS, training_losses, validation_losses
         )
 
-    def encode_decode_error(self):
+    def encode_decode_error(self) -> None:
+        """Evaluate encode-decode error
+        """
         self.retrain_config()
         error_func = torch.nn.MSELoss()
         self.encode_decode_errors_dataframe: DataFrame = DataFrame(
@@ -179,12 +188,21 @@ class Model_Trainer:
                         )
 
         self.fraud_cutoff = self.encode_decode_errors_dataframe[
-            "encode_decode_error"].max()
+            "reconstruction_error"].max()
 
-    def save_metadata(self) -> dict:
-        return {
-            "model_id": self.model_id,
-            "updating_date": datetime.today(),
-            "action": self.mode,
-            "fraud_cutoff": self.fraud_cutoff
-        }
+    def save_metadata(self) -> None:
+        """Store model training metadata
+        """
+        db = TinyDB('./data/models_metadata/metadata_history.json')
+        table = db.table('metadata_history')
+        table.insert(
+            {
+                "model_id": self.model_id,
+                **self.model_params,
+                "updating_date": date.today().strftime(
+                    "%Y-%m-%d"
+                ),
+                "action": self.mode,
+                "fraud_cutoff": self.fraud_cutoff
+            }
+        )

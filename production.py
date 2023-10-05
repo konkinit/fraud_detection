@@ -1,10 +1,11 @@
 import os
 import sys
 from fastapi import FastAPI
-from typing import Union
+from pandas import read_parquet
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
+from src.models import Model_Inference
 
 
 app = FastAPI()
@@ -12,12 +13,16 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"Hello": "Autoencoder fraud detector app"}
 
 
-@app.get("/customer/{customer_id}")
+@app.get("/customer_id/{customer}")
 def fraud_scorer(
-        customer_id: int,
-        score: Union[str, None] = None
+        customer: int,
+        model: str
 ) -> dict:
-    return {"customer_id": customer_id, "score": score}
+    X = read_parquet(
+        f"./data/{model}_raw.gzip")
+    score = Model_Inference(model)._error_eval(
+        X.values[customer])
+    return {"customer_id": customer, "score": score}

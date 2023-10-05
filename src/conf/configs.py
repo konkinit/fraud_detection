@@ -19,5 +19,6 @@ class PLOTTING_FEATURES:
     X: str = 'epoch'
     Y: str = 'loss'
     COLOR: str = "split"
+    RECONSTRUCTION_ERROR: str = "reconstruction_error"
     HEIGHT: int = 500
     WIDTH: int = 800

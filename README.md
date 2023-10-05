@@ -4,7 +4,8 @@
 </h1>
 
 <p align="center">
-    The project consists of implementing an autoencoder-based fraud detector
+    The project consists of implementing an autoencoder-based fraud detector 
+    on customers' data
 </p>
 
 <p align="center">
@@ -33,12 +34,12 @@ git clone https://github.com/konkinit/fraud_detection.git
 ```
 - For training a new model
 ```bash
-python training.py --idmodel 'simulated_data' --rawdatapath './data/simulated_raw_data.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50 --mode 'train'
+python training.py --idmodel 'simulated_data' --rawdatapath './data/simulated_data_raw.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50 --mode 'train'
 ```
 
 - For updating weigths of an existing model
 ```bash
-python training.py --idmodel 'simulated_data' --rawdatapath './data/simulated_raw_data_new_arrival.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50 --mode 'retrain'
+python training.py --idmodel 'simulated_data' --rawdatapath './data/simulated_data_raw_new_arrival.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50 --mode 'retrain'
 ```
 
 - After training or retraining a model, inference on instances is done by running: 

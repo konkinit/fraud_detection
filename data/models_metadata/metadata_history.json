@@ -1,0 +1,1 @@
+{"metadata_history": {"1": {"model_id": "simulated_data", "hidden_dim": 150, "code_dim": 35, "updating_date": "2023-10-05", "action": "train", "fraud_cutoff": 0.39168715476989746}, "2": {"model_id": "simulated_data", "input_dim": 300, "hidden_dim": 150, "code_dim": 35, "updating_date": "2023-10-05", "action": "train", "fraud_cutoff": 0.39854398369789124}}}

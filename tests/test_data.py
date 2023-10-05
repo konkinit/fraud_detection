@@ -8,7 +8,7 @@ if os.getcwd() not in sys.path:
 from src.data import CustomersDataset, DataLoaders
 
 
-data_path = "./data/simulated_raw_data_new_arrival.gzip"
+data_path = "./data/simulated_data_raw_new_arrival.gzip"
 
 
 def test_data_presence():
