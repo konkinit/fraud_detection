@@ -19,7 +19,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # Set user
 USER ${USERNAME}
 
-ENV PATH="${PATH}:/home/${USERNAME}}/.local/bin"
+ENV PATH="/home/${USERNAME}}/.local/bin:${PATH}"
 
 COPY --chown=${USERNAME}:${USERNAME} . /home/${USERNAME}/fraud_detection
 
