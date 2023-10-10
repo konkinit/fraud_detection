@@ -15,6 +15,12 @@ class MODEL_FEATURES:
 
 
 @dataclass
+class TINYDB_FEATURES:
+    DB_PATH: str = './data/models_metadata/metadata_history.json'
+    TABLE: str = 'metadata_history'
+
+
+@dataclass
 class PLOTTING_FEATURES:
     X: str = 'epoch'
     Y: str = 'loss'

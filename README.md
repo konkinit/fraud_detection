@@ -24,7 +24,6 @@
 ## To-Do
 
 - Design an online learning framework | Implement model retraining
-- Write Unit Tests
 - Search for real data for implementation
 
 

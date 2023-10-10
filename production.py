@@ -23,6 +23,10 @@ def fraud_scorer(
 ) -> dict:
     X = read_parquet(
         f"./data/{model}_raw.gzip")
-    score = Model_Inference(model)._error_eval(
+    error, label = Model_Inference(model)._error_classification_eval(
         X.values[customer])
-    return {"customer_id": customer, "score": score}
+    return {
+        "customer_id": customer,
+        "autoencoder_model_error": error,
+        "fraud_label": label
+    }

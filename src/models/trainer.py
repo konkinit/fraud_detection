@@ -8,7 +8,9 @@ from typing import List
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.conf import LAYERS_DIMS, MODEL_FEATURES
+from src.conf import (
+    LAYERS_DIMS, MODEL_FEATURES, TINYDB_FEATURES
+)
 from src.models import FraudAutoEncoder
 from src.data import DataLoaders
 from src.utils import get_device, losses_dataframe
@@ -63,8 +65,8 @@ class Model_Trainer:
         model_path = f"./models/best_model_{self.model_id}.ckpt"
         if os.path.isfile(os.path.join(model_path)):
             checkpoint = torch.load(
-                "./models/best_model_simulated_data.ckpt",
-                map_location="cuda:0"
+                model_path,
+                map_location=DEVICE
             )
             self.train_config()
             # assert indifference on params
@@ -193,8 +195,8 @@ class Model_Trainer:
     def save_metadata(self) -> None:
         """Store model training metadata
         """
-        db = TinyDB('./data/models_metadata/metadata_history.json')
-        table = db.table('metadata_history')
+        db = TinyDB(TINYDB_FEATURES.DB_PATH)
+        table = db.table(TINYDB_FEATURES.TABLE)
         table.insert(
             {
                 "model_id": self.model_id,
