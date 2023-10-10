@@ -29,4 +29,4 @@ RUN pip install -r requirements.txt --user
 
 EXPOSE 8800
 
-ENTRYPOINT ["uvicorn", "production:app", "--port", "8800", "--reload"]
+ENTRYPOINT ["python", "-m", "uvicorn", "production:app", "--port", "8800", "--reload"]
