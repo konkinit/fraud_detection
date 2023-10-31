@@ -32,6 +32,10 @@
 - Clone the repo, get in the directory `fraud_detection/` 
 ```bash
 git clone https://github.com/konkinit/fraud_detection.git
+
+cd ./fraud_detection
+
+pip install -r requirements.txt
 ```
 
 - For training a new model, run the following command with the tuned args
@@ -39,13 +43,13 @@ git clone https://github.com/konkinit/fraud_detection.git
 python training.py --help
 ```
 ```bash
-python training.py --mode 'train' --idmodel 'simulated_data' --rawdatapath './data/simulated_data_raw.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
+python training.py --mode 'train' --idmodel 'simulated_data' --rawdatapath 's3_data_raw.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
 ```
 
 - For updating weigths of an existing model (ensure the dimensions passed through the args are 
 the same as the current model dimensions)
 ```bash
-python training.py --mode 'retrain' --idmodel 'simulated_data' --rawdatapath './data/simulated_data_raw_new_arrival.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
+python training.py --mode 'retrain' --idmodel 'simulated_data' --rawdatapath 's3_data_raw_new_arrival.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
 ```
 
 - After training or retraining a model, inference on instances is done by running: 
@@ -64,6 +68,10 @@ important to notice that fraud is rare event that is to say in a sample of 1000 
 up to 5 appear to have a fraudulent behaviours. Gather, in a customer base, a large number 
 of typical customers is then realistic conequently train a model aiming to identify regular 
 behaviours and reconstruct a typical customer profile is possible. It turns out that 
-AutoEncoders perform this task. 
+AutoEncoders perform this task.
+
+## Model
+
+
 
 ## References & Citations

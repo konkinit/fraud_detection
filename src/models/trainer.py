@@ -2,7 +2,7 @@ import os
 import sys
 import torch
 from datetime import date
-from pandas import read_parquet, DataFrame, concat
+from pandas import DataFrame, concat
 from tinydb import TinyDB
 from typing import List
 
@@ -12,7 +12,7 @@ from src.conf import (
     LAYERS_DIMS, MODEL_FEATURES, TINYDB_FEATURES
 )
 from src.models import FraudAutoEncoder
-from src.data import DataLoaders
+from src.data import DataLoaders, read_data_from_s3
 from src.utils import get_device, losses_dataframe
 
 
@@ -32,7 +32,7 @@ class Model_Trainer:
     ) -> None:
         self.model_id = model_id
         # Data setting
-        raw_data = read_parquet(raw_data_path)
+        raw_data = read_data_from_s3(raw_data_path)
         (
             self.train_dataloader,
             self.validation_dataloader,

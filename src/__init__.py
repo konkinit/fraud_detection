@@ -10,6 +10,7 @@ from .utils import (
     get_device,
     losses_dataframe
 )
+from .data import data, s3_data
 
 
 __all__ = [
@@ -20,5 +21,7 @@ __all__ = [
     "get_device",
     "losses_dataframe",
     "inference",
-    "trainer"
+    "trainer",
+    "data",
+    "s3_data"
 ]
