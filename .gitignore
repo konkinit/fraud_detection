@@ -1,5 +1,5 @@
 # Custom
-acces-key.yaml
+s3_credentials.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

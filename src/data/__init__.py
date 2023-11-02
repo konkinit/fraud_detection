@@ -1,9 +1,7 @@
-from .data import DataLoaders, CustomersDataset
-from .s3_data import read_data_from_s3
+from .model_data import DataLoaders, CustomersDataset
 
 
 __all__ = [
     "CustomersDataset",
-    "DataLoaders",
-    "read_data_from_s3"
+    "DataLoaders"
 ]

@@ -12,8 +12,12 @@ from src.conf import (
     LAYERS_DIMS, MODEL_FEATURES, TINYDB_FEATURES
 )
 from src.models import FraudAutoEncoder
-from src.data import DataLoaders, read_data_from_s3
-from src.utils import get_device, losses_dataframe
+from src.data import DataLoaders
+from src.utils import (
+    get_device, losses_dataframe,
+    read_data_from_s3,
+    upload_model_in_s3
+)
 
 
 DEVICE = get_device(1)
@@ -40,14 +44,14 @@ class Model_Trainer:
         ) = DataLoaders(raw_data, data_split_fractions).get_dataloaders()
 
         self.layers_dim = LAYERS_DIMS(
-            INPUT_DIM=raw_data.shape[1], HIDDEN_DIM=hidden_dim,
+            INPUT_DIM=-2+raw_data.shape[1], HIDDEN_DIM=hidden_dim,
             CODE_DIM=code_dim
         )
         self.model_hyperparams = MODEL_FEATURES(
             LEARNING_RATE=learning_rate, N_EPOCHS=n_epochs
         )
         self.model_params = {
-            "input_dim": raw_data.shape[1],
+            "input_dim": -2+raw_data.shape[1],
             "hidden_dim": hidden_dim,
             "code_dim": code_dim
         }
@@ -146,6 +150,8 @@ class Model_Trainer:
             },
             f"./models/best_model_{self.model_id}.ckpt",
         )
+
+        upload_model_in_s3(f"best_model_{self.model_id}.ckpt")
 
         self.losses_dataframe = losses_dataframe(
             self.model_hyperparams.N_EPOCHS, training_losses, validation_losses

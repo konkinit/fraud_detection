@@ -21,6 +21,8 @@ USER ${USERNAME}
 
 ENV PATH="/home/${USERNAME}}/.local/bin:${PATH}"
 
+
+
 COPY --chown=${USERNAME}:${USERNAME} . /home/${USERNAME}/fraud_detection
 
 WORKDIR /home/${USERNAME}/fraud_detection

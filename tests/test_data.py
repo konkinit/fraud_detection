@@ -1,25 +1,24 @@
 import os
 import sys
 import pytest
-from pandas import read_parquet
+from pandas import DataFrame
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.data import CustomersDataset, DataLoaders
+from src.utils import read_data_from_s3
 
 
-data_path = "./data/simulated_data_raw_new_arrival.gzip"
+data_path = "test_data/typical_customers.gzip"
 
 
 def test_data_presence():
-    assert os.path.isfile(os.path.join(data_path))
+    assert isinstance(read_data_from_s3(data_path), DataFrame)
 
 
-df_for_testing = read_parquet(
-    data_path
-)
-data_for_testing = df_for_testing.values
-ids_data_for_testing = df_for_testing.index.values
+df_for_testing = read_data_from_s3(data_path)
+data_for_testing = df_for_testing.drop(columns=["Ids", "Y"], axis=1).values
+ids_data_for_testing = df_for_testing["Ids"].values
 data_for_testing_type = type(data_for_testing[0])
 split_fractions = [0.7, 0.2, 0.1]
 

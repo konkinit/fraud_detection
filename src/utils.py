@@ -1,7 +1,64 @@
+import os
+import sys
 from numpy import array, append, random
-from pandas import DataFrame, concat
 from torch import device, cuda
 from typing import List
+from pandas import read_parquet, DataFrame, concat
+import s3fs
+import awswrangler
+import boto3
+import yaml
+
+if os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
+
+
+def upload_model_in_s3(
+        _local_file: str,
+        access_keys: dict = None
+) -> None:
+    if access_keys is None:
+        with open('./data/s3_credentials.yaml', 'r') as file:
+            access_keys = yaml.safe_load(file)
+
+    assert isinstance(access_keys, dict)
+    boto3_session = boto3.Session(
+        aws_access_key_id=access_keys["key"],
+        aws_secret_access_key=access_keys["secret"],
+        region_name=access_keys["region"]
+    )
+
+    awswrangler.s3.upload(
+        local_file=f"./models/{_local_file}",
+        path=f"s3://models-factory/{_local_file}",
+        boto3_session=boto3_session
+    )
+
+
+def read_data_from_s3(
+        file_name: str,
+        access_keys: dict = None
+) -> DataFrame:
+    if access_keys is None:
+        with open('./data/s3_credentials.yaml', 'r') as file:
+            access_keys = yaml.safe_load(file)
+
+    assert isinstance(access_keys, dict)
+
+    fs = s3fs.S3FileSystem(
+        key=access_keys["key"],
+        secret=access_keys["secret"]
+    )
+
+    return read_parquet(
+        fs.open(
+            fs.ls(
+                str(
+                    f"customer-data-platform-retail/{file_name}"
+                )
+            )[0]
+        )
+    )
 
 
 def data_transform():

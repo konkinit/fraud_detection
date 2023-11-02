@@ -23,41 +23,7 @@
 
 ## To-Do
 
-- Design an online learning framework | Implement model retraining
-- Search for real data for implementation
-
-
-## Quick Start
-
-- Clone the repo, get in the directory `fraud_detection/` 
-```bash
-git clone https://github.com/konkinit/fraud_detection.git
-
-cd ./fraud_detection
-
-pip install -r requirements.txt
-```
-
-- For training a new model, run the following command with the tuned args
-```bash
-python training.py --help
-```
-```bash
-python training.py --mode 'train' --idmodel 'simulated_data' --rawdatapath 's3_data_raw.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
-```
-
-- For updating weigths of an existing model (ensure the dimensions passed through the args are 
-the same as the current model dimensions)
-```bash
-python training.py --mode 'retrain' --idmodel 'simulated_data' --rawdatapath 's3_data_raw_new_arrival.gzip' --splitfrac 0.7 0.2 0.1 --codedim 35 --hiddendim 150 --lr 1e-3 --nepochs 50
-```
-
-- After training or retraining a model, inference on instances is done by running: 
-```bash
-uvicorn production:app --port 8800 --reload
-```
-The endpoint looks like `/customer_id/{customer}?model={model_id}` where `{customer}` 
-refers to an identifier of a customer and `{model_id}` is the deployed fraud detector model.
+- Cache s3 access keys in docker image
 
 ## Description
 
@@ -71,6 +37,53 @@ behaviours and reconstruct a typical customer profile is possible. It turns out 
 AutoEncoders perform this task.
 
 ## Model
+
+The model detecting fraud is an autoencoder trained on a group of customers labelled as 
+typical ones on their closed relationship basis.
+
+## Experiments
+
+To get hands on the project there are two ways. 
+
+1. Through repo cloning: this way allows model train or weights updating
+
++ Clone the repo, get in the directory `fraud_detection/` 
+```bash
+git clone https://github.com/konkinit/fraud_detection.git
+
+cd ./fraud_detection
+
+pip install -r requirements.txt
+```
+
++ For training a new model, run the following command with the tuned args
+```bash
+python training.py --help
+```
+```bash
+python training.py --mode 'train' --idmodel 'on_real_data_0211231210' --rawdatapath "data/typical_customers.gzip" --splitfrac 0.7 0.2 0.1 --codedim 75 --hiddendim 150 --lr 1e-3 --nepochs 50
+```
+
++ For updating weigths of an existing model (ensure the dimensions passed through the args are 
+the same as the current model dimensions):
+```bash
+python training.py --mode 'retrain' --idmodel 'on_real_data' --rawdatapath 'data/typical_customers.gzip' --splitfrac 0.7 0.2 0.1 --codedim 75 --hiddendim 150 --lr 1e-3 --nepochs 50
+```
+
++ After training or retraining a model, inference on instances is done by running: 
+```bash
+uvicorn production:app --port 8800 --reload
+```
+The endpoint looks like `/customer_id/{customer}?model={model_id}` where `{customer}` 
+refers to an identifier of a customer and `{model_id}` is the deployed fraud detector model.
+
+2. Through Docker image by running the following commands
+```bash
+docker pull kidrissa/fraud_detector_app:latest
+
+docker run kidrissa/fraud_detector_app:latest -p 8800:8800
+```
+In a web navigator, connect to `<container-ip>:8800`
 
 
 

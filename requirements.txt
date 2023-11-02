@@ -9,3 +9,4 @@ kaleido
 fastapi
 uvicorn[standard]
 tinydb
+awswrangler

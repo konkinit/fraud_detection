@@ -24,10 +24,7 @@ dataloader_kwargs = {
 
 class CustomersDataset(Dataset):
     def __init__(
-            self,
-            data,
-            ids,
-            transform=None
+            self, data, ids, transform=None
     ) -> None:
         super().__init__()
         self.dataset = data
@@ -54,8 +51,8 @@ class DataLoaders:
         assert array(
             split_fractions
         ).sum().round(1) == 1.0, "Sum of fractions diffrent of 1.0"
-        data = raw_dataset.values
-        ids = raw_dataset.index.values
+        data = raw_dataset.drop(columns=["Ids", "Y"], axis=1).values
+        ids = raw_dataset["Ids"].values
 
         data = from_numpy(data).to(DEVICE).to(float32)
         idx_arrays = ml_partitions_indices(
