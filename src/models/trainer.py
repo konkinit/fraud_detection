@@ -1,7 +1,7 @@
 import os
 import sys
 import torch
-from datetime import date
+from datetime import datetime
 from pandas import DataFrame, concat
 from tinydb import TinyDB
 from typing import List
@@ -25,33 +25,36 @@ DEVICE = get_device(1)
 
 class Model_Trainer:
     def __init__(
-        self,
-        model_id: str,
-        raw_data_path: str,
+        self, model_id: str,
+        training_data_path: str,
+        cutoff_eval_data_path: str,
         data_split_fractions: List[float],
-        hidden_dim: int,
-        code_dim: int,
-        learning_rate: float,
-        n_epochs: int,
+        hidden_dim: int, code_dim: int,
+        learning_rate: float, n_epochs: int,
     ) -> None:
         self.model_id = model_id
         # Data setting
-        raw_data = read_data_from_s3(raw_data_path)
+        training_data = read_data_from_s3(training_data_path)
+        cutoff_eval_data = read_data_from_s3(cutoff_eval_data_path)
         (
             self.train_dataloader,
             self.validation_dataloader,
             self.test_dataloader,
-        ) = DataLoaders(raw_data, data_split_fractions).get_dataloaders()
+            self.cutoff_eval_dataloader
+        ) = (
+                DataLoaders(training_data, data_split_fractions, cutoff_eval_data)
+                .get_dataloaders()
+        )
 
         self.layers_dim = LAYERS_DIMS(
-            INPUT_DIM=-2+raw_data.shape[1], HIDDEN_DIM=hidden_dim,
+            INPUT_DIM=-2+training_data.shape[1], HIDDEN_DIM=hidden_dim,
             CODE_DIM=code_dim
         )
         self.model_hyperparams = MODEL_FEATURES(
             LEARNING_RATE=learning_rate, N_EPOCHS=n_epochs
         )
         self.model_params = {
-            "input_dim": -2+raw_data.shape[1],
+            "input_dim": -2+training_data.shape[1],
             "hidden_dim": hidden_dim,
             "code_dim": code_dim
         }
@@ -69,8 +72,7 @@ class Model_Trainer:
         model_path = f"./models/best_model_{self.model_id}.ckpt"
         if os.path.isfile(os.path.join(model_path)):
             checkpoint = torch.load(
-                model_path,
-                map_location=DEVICE
+                model_path, map_location=DEVICE
             )
             self.train_config()
             # assert indifference on params
@@ -157,18 +159,19 @@ class Model_Trainer:
             self.model_hyperparams.N_EPOCHS, training_losses, validation_losses
         )
 
-    def encode_decode_error(self) -> None:
+    def cutoff_eval(self) -> None:
         """Evaluate encode-decode error
         """
         self.retrain_config()
         error_func = torch.nn.MSELoss()
-        self.encode_decode_errors_dataframe: DataFrame = DataFrame(
-            columns=["id", "encode_decode_error", "split"]
+        self.reconstruct_errors_dataframe: DataFrame = DataFrame(
+            columns=["ids", "reconstruction_error", "split"]
         )
         dataloader_split_dict = {
             "train": self.train_dataloader,
             "validation": self.validation_dataloader,
-            "test": self.test_dataloader
+            "test": self.test_dataloader,
+            "cutoff_eval": self.cutoff_eval_dataloader
         }
         for split in list(dataloader_split_dict.keys()):
             for _, (batch_ids, batch_samples) in enumerate(
@@ -177,17 +180,16 @@ class Model_Trainer:
                 assert batch_ids.shape[0] == batch_samples.shape[0]
                 for i in range(batch_ids.shape[0]):
                     with torch.no_grad():
-                        _x = batch_samples[i]
-                        _error = error_func(_x, self.model(_x))
-                        self.encode_decode_errors_dataframe = concat(
+                        x = batch_samples[i]
+                        error = error_func(x, self.model(x))
+                        self.reconstruct_errors_dataframe = concat(
                             [
-                                self.encode_decode_errors_dataframe,
+                                self.reconstruct_errors_dataframe,
                                 DataFrame(
                                     data=[
                                         {
-                                            "id": batch_ids[i].data,
-                                            "reconstruction_error": float(
-                                                _error.data),
+                                            "ids": batch_ids[i].item(),
+                                            "reconstruction_error": error.data.item(),
                                             "split": split,
                                         }
                                     ]
@@ -195,7 +197,7 @@ class Model_Trainer:
                             ]
                         )
 
-        self.fraud_cutoff = self.encode_decode_errors_dataframe[
+        self.fraud_cutoff = self.reconstruct_errors_dataframe[
             "reconstruction_error"].max()
 
     def save_metadata(self) -> None:
@@ -207,7 +209,7 @@ class Model_Trainer:
             {
                 "model_id": self.model_id,
                 **self.model_params,
-                "updating_date": date.today().strftime(
+                "updating_date": datetime.now().strftime(
                     "%Y-%m-%d"
                 ),
                 "action": self.mode,

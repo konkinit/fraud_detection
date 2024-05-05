@@ -11,7 +11,7 @@ from src.models import Model_Inference
 from src.utils import read_data_from_s3
 
 
-data_path = "test_data/typical_customers.gzip"
+data_path = "test_data/fraudulent_obs_test_data.gzip"
 
 
 def test_data_presence():
@@ -23,18 +23,6 @@ data_for_testing = df_for_testing.drop(columns=["Ids", "Y"], axis=1).values
 ids_data_for_testing = df_for_testing["Ids"].values
 data_for_testing_type = type(data_for_testing[0])
 split_fractions = [0.7, 0.2, 0.1]
-
-
-@pytest.mark.parametrize(
-    argnames=["model_id", "presence"],
-    argvalues=[
-        ("simulated_data", True),
-        ("_simulated_data", False)
-    ]
-)
-def test_model_presence(model_id: str, presence: bool):
-    model_path = f"./models/best_model_{model_id}.ckpt"
-    assert os.path.isfile(os.path.join(model_path)) == presence
 
 
 @pytest.mark.parametrize(

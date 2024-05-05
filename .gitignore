@@ -1,5 +1,6 @@
 # Custom
-s3_credentials.yaml
+*.gzip
+*.ruff*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

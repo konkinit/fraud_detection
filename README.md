@@ -53,21 +53,29 @@ git clone https://github.com/konkinit/fraud_detection.git
 
 cd ./fraud_detection
 
-pip install -r requirements.txt
+pip install -r requirements.txt --upgrade
+```
+
++ Create a `.env` file
+```bash
+S3_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+S3_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+S3_REGION=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 + For training a new model, run the following command with the tuned args
 ```bash
 python training.py --help
 ```
+
 ```bash
-python training.py --mode 'train' --idmodel 'on_real_data_0211231210' --rawdatapath "data/typical_customers.gzip" --splitfrac 0.7 0.2 0.1 --codedim 75 --hiddendim 150 --lr 1e-3 --nepochs 50
+python training.py --mode 'train' --idmodel 'simulated_data' --trainingdatapath "data/fraudulent_obs_data.gzip" --cutoffevaldatapath "data/non_fraudulent_obs_data.gzip" --splitfrac 0.6 0.2 0.2 --codedim 5 --hiddendim 15 --lr 1e-3 --nepochs 50
 ```
 
 + For updating weigths of an existing model (ensure the dimensions passed through the args are 
 the same as the current model dimensions):
 ```bash
-python training.py --mode 'retrain' --idmodel 'on_real_data' --rawdatapath 'data/typical_customers.gzip' --splitfrac 0.7 0.2 0.1 --codedim 75 --hiddendim 150 --lr 1e-3 --nepochs 50
+python training.py --mode 'retrain' --idmodel 'simulated_data' --trainingdatapath 'data/fraudulent_obs_data.gzip' --splitfrac 0.6 0.2 0.2 --codedim 5 --hiddendim 15 --lr 1e-3 --nepochs 50
 ```
 
 + After training or retraining a model, inference on instances is done by running: 

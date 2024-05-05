@@ -18,9 +18,14 @@ parser.add_argument(
     Model unique identifier""", required=True
 )
 parser.add_argument(
-    '--rawdatapath', type=str,
+    '--trainingdatapath', type=str,
     help="""
-    Raw data storage path""", required=True
+    Training data storage path""", required=True
+)
+parser.add_argument(
+    '--cutoffevaldatapath', type=str,
+    help="""
+    Cutoff evaluation data storage path""", required=True
 )
 parser.add_argument(
     '--splitfrac', nargs=3, type=float,
@@ -54,9 +59,10 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
 
-    _model_trainer = Model_Trainer(
+    model_trainer = Model_Trainer(
         model_id=args.idmodel,
-        raw_data_path=args.rawdatapath,
+        training_data_path=args.trainingdatapath,
+        cutoff_eval_data_path=args.cutoffevaldatapath,
         data_split_fractions=args.splitfrac,
         hidden_dim=args.hiddendim,
         code_dim=args.codedim,
@@ -64,27 +70,21 @@ if __name__ == "__main__":
         n_epochs=args.nepochs
     )
 
-    _model_trainer.update_weights(mode=args.mode)
+    model_trainer.update_weights(mode=args.mode)
 
-    _model_trainer.encode_decode_error()
+    model_trainer.cutoff_eval()
 
-    _model_trainer.save_metadata()
+    model_trainer.save_metadata()
 
-    _fig = px.histogram(
-        _model_trainer.encode_decode_errors_dataframe,
-        x=PLOTTING_FEATURES.RECONSTRUCTION_ERROR,
-        color=PLOTTING_FEATURES.COLOR
+    model_trainer.reconstruct_errors_dataframe.to_csv(
+        f"./data/obs_errors_{args.idmodel}.csv", index=False
     )
+
     fig = px.line(
-        _model_trainer.losses_dataframe,
-        x=PLOTTING_FEATURES.X,
-        y=PLOTTING_FEATURES.Y,
-        color=PLOTTING_FEATURES.COLOR,
+        model_trainer.losses_dataframe, x=PLOTTING_FEATURES.X,
+        y=PLOTTING_FEATURES.Y, color=PLOTTING_FEATURES.COLOR
     )
 
-    _fig.write_image(
-        "./data/figs/reconstruction_error_X_split.png", engine="kaleido",
-    )
     fig.write_image(
         "./data/figs/losses_X_epoch.png", engine="kaleido",
     )

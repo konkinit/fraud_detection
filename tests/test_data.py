@@ -9,7 +9,7 @@ from src.data import CustomersDataset, DataLoaders
 from src.utils import read_data_from_s3
 
 
-data_path = "test_data/typical_customers.gzip"
+data_path = "test_data/fraudulent_obs_test_data.gzip"
 
 
 def test_data_presence():
@@ -24,24 +24,24 @@ split_fractions = [0.7, 0.2, 0.1]
 
 
 @pytest.mark.parametrize(
-    argnames=["_data", "_type"],
+    argnames=["data", "data_type"],
     argvalues=[
         (data_for_testing, data_for_testing_type)
     ]
 )
-def test_CustomersDataset(_data, _type) -> None:
-    _customer_data = CustomersDataset(_data, ids_data_for_testing)
-    assert len(_data) == len(_customer_data)
-    assert isinstance(_customer_data[0][1], _type)
+def test_CustomersDataset(data, data_type) -> None:
+    _customer_data = CustomersDataset(data, ids_data_for_testing)
+    assert len(data) == len(_customer_data)
+    assert isinstance(_customer_data[0][1], data_type)
 
 
 @pytest.mark.parametrize(
-    argnames=["_data", "_splits_fraction", "_dataloaders"],
+    argnames=["data", "splits_fraction", "dataloaders"],
     argvalues=[
         (df_for_testing, split_fractions, 3),
     ]
 )
-def test_DataLoaders(_data, _splits_fraction, _dataloaders) -> None:
+def test_DataLoaders(data, splits_fraction, dataloaders) -> None:
     assert len(DataLoaders(
-        _data, _splits_fraction
-    ).get_dataloaders()) == _dataloaders
+        data, splits_fraction
+    ).get_dataloaders()) == dataloaders

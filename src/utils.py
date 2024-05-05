@@ -1,31 +1,32 @@
 import os
 import sys
-from numpy import array, append, random
-from torch import device, cuda
-from typing import List
-from pandas import read_parquet, DataFrame, concat
 import s3fs
 import awswrangler
 import boto3
-import yaml
+from dotenv import load_dotenv
+# from functools import lru_cache
+from numpy import array, append, random
+from torch import device, cuda, load
+from typing import List, Any
+from sklearn.metrics import recall_score, confusion_matrix, precision_score
+from pandas import read_parquet, DataFrame, concat
+
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 
 
+load_dotenv()
+
+
 def upload_model_in_s3(
         _local_file: str,
-        access_keys: dict = None
 ) -> None:
-    if access_keys is None:
-        with open('./data/s3_credentials.yaml', 'r') as file:
-            access_keys = yaml.safe_load(file)
 
-    assert isinstance(access_keys, dict)
     boto3_session = boto3.Session(
-        aws_access_key_id=access_keys["key"],
-        aws_secret_access_key=access_keys["secret"],
-        region_name=access_keys["region"]
+        aws_access_key_id=os.getenv("S3_KEY"),
+        aws_secret_access_key=os.getenv("S3_SECRET"),
+        region_name=os.getenv("S3_REGION")
     )
 
     awswrangler.s3.upload(
@@ -35,19 +36,45 @@ def upload_model_in_s3(
     )
 
 
-def read_data_from_s3(
-        file_name: str,
-        access_keys: dict = None
-) -> DataFrame:
-    if access_keys is None:
-        with open('./data/s3_credentials.yaml', 'r') as file:
-            access_keys = yaml.safe_load(file)
-
-    assert isinstance(access_keys, dict)
+def read_model_from_s3(model_id: str, device_id: int = 1) -> Any:
+    device = get_device(device_id)
 
     fs = s3fs.S3FileSystem(
-        key=access_keys["key"],
-        secret=access_keys["secret"]
+        key=os.getenv("S3_KEY"),
+        secret=os.getenv("S3_SECRET")
+    )
+
+    model_cktp = fs.open(
+        fs.ls(
+            str(f"models-factory/best_model_{model_id}.ckpt")
+        )[0]
+    )
+
+    return load(model_cktp, map_location=device)
+
+
+def upload_data_in_s3(file_name: str, folder: str = 'data') -> None:
+
+    boto3_session = boto3.Session(
+        aws_access_key_id=os.getenv("S3_KEY"),
+        aws_secret_access_key=os.getenv("S3_SECRET"),
+        region_name=os.getenv("S3_REGION")
+    )
+
+    awswrangler.s3.upload(
+        local_file=f"./data/{file_name}",
+        path=f"s3://customer-data-platform-retail/{folder}/{file_name}",
+        boto3_session=boto3_session
+    )
+
+
+def read_data_from_s3(
+        file_name: str
+) -> DataFrame:
+
+    fs = s3fs.S3FileSystem(
+        key=os.getenv("S3_KEY"),
+        secret=os.getenv("S3_SECRET")
     )
 
     return read_parquet(
@@ -148,5 +175,5 @@ def losses_dataframe(
     )
 
 
-def encode_decode_error_dataframe():
-    pass
+def cutoff_evaluation() -> float:
+    ...

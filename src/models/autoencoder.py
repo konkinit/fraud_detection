@@ -11,10 +11,7 @@ from src.conf import (
 
 
 class FraudAutoEncoder(nn.Module):
-    def __init__(
-            self,
-            layer_dimensions: LAYERS_DIMS
-    ) -> None:
+    def __init__(self, layer_dimensions: LAYERS_DIMS) -> None:
         super().__init__()
         self.encoder = nn.Sequential(
             nn.Linear(
@@ -41,10 +38,7 @@ class FraudAutoEncoder(nn.Module):
             nn.ReLU()
         )
 
-    def forward(
-            self,
-            input_features: Tensor
-    ) -> Any:
+    def forward(self, input_features: Tensor) -> Any:
         """Forward pass
 
         Args:

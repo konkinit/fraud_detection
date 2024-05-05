@@ -1,11 +1,15 @@
 pytest
 flake8
+ruff
 black
+python-dotenv
 pandas
 pyarrow
 fastparquet
 plotly
+scikit-learn
 kaleido
+streamlit
 fastapi
 uvicorn[standard]
 tinydb

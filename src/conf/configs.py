@@ -1,15 +1,14 @@
 from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class LAYERS_DIMS:
+class LAYERS_DIMS(BaseModel):
     INPUT_DIM: int
     HIDDEN_DIM: int
     CODE_DIM: int
 
 
-@dataclass
-class MODEL_FEATURES:
+class MODEL_FEATURES(BaseModel):
     LEARNING_RATE: float
     N_EPOCHS: int
 

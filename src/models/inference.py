@@ -9,17 +9,14 @@ if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.models import FraudAutoEncoder
 from src.conf import LAYERS_DIMS, TINYDB_FEATURES
-from src.utils import get_device
+from src.utils import get_device, read_model_from_s3
 
 
 DEVICE = get_device(1)
 
 
 class Model_Inference:
-    def __init__(
-            self,
-            model_id: str,
-    ):
+    def __init__(self, model_id: str):
         db = TinyDB(TINYDB_FEATURES.DB_PATH)
         table = db.table(TINYDB_FEATURES.TABLE)
         user = Query()
@@ -32,10 +29,8 @@ class Model_Inference:
             HIDDEN_DIM=model_metadata["hidden_dim"],
             CODE_DIM=model_metadata["code_dim"]
         )
-        checkpoint = torch.load(
-            f"./models/best_model_{model_id}.ckpt",
-            map_location=DEVICE
-        )
+        checkpoint = read_model_from_s3(model_id)
+
         self.model = FraudAutoEncoder(_LAYERS_DIMS).to(DEVICE)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model.eval()
@@ -43,8 +38,7 @@ class Model_Inference:
         self.error = torch.nn.MSELoss()
 
     def _error_classification_eval(
-            self,
-            x: torch.Tensor | np.ndarray
+            self, x: torch.Tensor | np.ndarray
     ) -> Tuple[float, int]:
         """Evaluate reconstrction error and classify the obs
         as frauder or not

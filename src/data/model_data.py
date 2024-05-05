@@ -46,7 +46,8 @@ class DataLoaders:
     def __init__(
             self,
             raw_dataset: DataFrame,
-            split_fractions: List[float]
+            split_fractions: List[float],
+            cutoff_eval_dataset: DataFrame
     ) -> None:
         assert array(
             split_fractions
@@ -59,16 +60,22 @@ class DataLoaders:
             raw_dataset.shape[0], split_fractions
         )
         self.train_dataset = CustomersDataset(
-            data[idx_arrays[0]],
-            ids[idx_arrays[0]]
+            data[idx_arrays[0]], ids[idx_arrays[0]]
         )
         self.validation_dataset = CustomersDataset(
-            data[idx_arrays[1]],
-            ids[idx_arrays[1]]
+            data[idx_arrays[1]], ids[idx_arrays[1]]
         )
         self.test_dataset = CustomersDataset(
-            data[idx_arrays[2]],
-            ids[idx_arrays[2]]
+            data[idx_arrays[2]], ids[idx_arrays[2]]
+        )
+
+        cutoff_eval_data = cutoff_eval_dataset.drop(columns=["Ids", "Y"], axis=1).values
+        cutoff_eval_ids = raw_dataset["Ids"].values
+
+        cutoff_eval_data = from_numpy(cutoff_eval_data).to(DEVICE).to(float32)
+
+        self.cutoff_eval_dataset = CustomersDataset(
+            cutoff_eval_data, cutoff_eval_ids
         )
 
     def get_dataloaders(self) -> Tuple[DataLoader]:
@@ -80,5 +87,6 @@ class DataLoaders:
         return (
             DataLoader(self.train_dataset, **dataloader_kwargs),
             DataLoader(self.validation_dataset, **dataloader_kwargs),
-            DataLoader(self.test_dataset, **dataloader_kwargs)
+            DataLoader(self.test_dataset, **dataloader_kwargs),
+            DataLoader(self.cutoff_eval_dataset, **dataloader_kwargs)
         )
